@@ -5,16 +5,24 @@
 (defclass editable-advice () ())
 
 ;;; multiple cursors
-(defun process-each-cursors (function)
-  (let ((buffer (current-buffer)))
-    (dolist (point (sort (copy-list (buffer-fake-cursors buffer)) #'point<))
-      (with-buffer-point (buffer point)
-        (with-current-killring (fake-cursor-killring point)
-          (handler-case
-              (save-continue-flags
-                (funcall function))
-            (move-cursor-error ())))))
-    (funcall function)))
+(defun process-each-cursors (fn)
+  (declare (type function fn))
+  (let* ((buffer (current-buffer))
+         (current (buffer-point buffer))
+         (cursors (buffer-cursors buffer)))
+    (declare (type lem:buffer buffer)
+             (type lem/buffer/internal:point current)
+             (type (list lem:cursor) cursors)
+             (optimize (speed 3) (safety 2)))
+    (dolist (point cursors)
+      (unless (eq point current)            ; skip the real cursor
+        (with-buffer-point (buffer point)
+          (with-current-killring (fake-cursor-killring point)
+            (handler-case
+                (save-continue-flags
+                  (funcall fn))
+              (move-cursor-error ()))))))
+    (funcall fn)))
 
 (defmacro do-each-cursors (() &body body)
   `(process-each-cursors (lambda () ,@body)))
