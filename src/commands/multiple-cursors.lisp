@@ -4,7 +4,9 @@
            #:add-cursors-to-previous-line
            #:add-cursors-to-right
            #:add-cursors-to-left
-           #:clear-cursors)
+           #:clear-cursors
+           #:move-to-next-fake-cursor
+           #:move-to-previous-fake-cursor)
   #+sbcl
   (:lock t))
 (in-package :lem-core/commands/multiple-cursors)
@@ -63,6 +65,48 @@
   (duplicate-cursors :char-step -1
                      :duplicate-p #'point=
                      :n n))
+
+(defun cycle-real-cursor (step)
+  "Move the real cursor to take next or previous fake cursor position by STEP.
+  Works both horizontally and vertically, as it is based on buffer positions."
+  (declare (type fixnum step)
+           (optimize (speed 3) (safety 2)))
+  (let* ((buffer (current-buffer))
+         (fake-cursors (buffer-fake-cursors buffer)))
+    (declare (type lem:buffer buffer)
+             (type (or null (list fake-cursor)) fake-cursors))
+    (when fake-cursors
+      (let* ((real-cursor  (buffer-point buffer))
+             (cursors      (buffer-cursors buffer))
+             (index        (position real-cursor cursors))
+             (target-index (mod (+ index step) (length cursors)))
+             (target       (nth target-index cursors)))
+        (declare (type lem:cursor real-cursor target)
+                 (type (or null (list lem:cursor)) cursors)
+                 (type fixnum index target-index))
+        (unless (eq target real-cursor)
+          (let ((killring (fake-cursor-killring target))
+                (mark (fake-cursor-mark target)))
+            (make-fake-cursor real-cursor)
+            (move-point real-cursor target)
+            (setf lem-core::*killring* killring)
+            (when (mark-active-p mark)
+              (set-cursor-mark real-cursor (copy-point (mark-point mark))))
+            (delete-fake-cursor target)))))))
+
+(define-command move-to-next-fake-cursor (n) (:universal-nil)
+  "Move the real cursor to the Nth next fake cursor."
+  (declare (type (or null fixnum) n))
+  (let ((n (or n 1)))
+    (declare (type fixnum n))
+    (cycle-real-cursor n)))
+
+(define-command move-to-previous-fake-cursor (n) (:universal-nil)
+  "Move the real cursor to the Nth previous fake cursor."
+  (declare (type (or null fixnum) n))
+  (let ((n (or n 1)))
+    (declare (type fixnum n))
+    (cycle-real-cursor (- n))))
 
 (defun clear-duplicate-cursors (buffer)
   (declare (type lem:buffer buffer)
