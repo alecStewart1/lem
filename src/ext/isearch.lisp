@@ -29,6 +29,7 @@
            :isearch-toggle-highlighting
            :isearch-add-cursor-to-next-match
            :isearch-add-cursor-to-prev-match
+           :isearch-add-cursor-to-all-matches
            :read-query-replace-args
            :query-replace
            :query-replace-regexp
@@ -91,13 +92,14 @@
 (define-key *global-keymap* "M-s M-t" 'isearch-toggle-highlighting)
 (define-key *isearch-keymap* "C-M-n" 'isearch-add-cursor-to-next-match)
 (define-key *isearch-keymap* "C-M-p" 'isearch-add-cursor-to-prev-match)
+(define-key *isearch-keymap* "C-M-m" 'isearch-add-cursor-to-all-matches)
 
 (defun disable-hook ()
   (setf (variable-value 'isearch-next-last :buffer) nil)
   (setf (variable-value 'isearch-prev-last :buffer) nil)
   (delete-popup-message *isearch-popup-message*))
 
-
+
 (defun isearch-default-string ()
   (unless *isearch-previous-string*
     (setf *isearch-previous-string* (config :isearch-previous-string "")))
@@ -107,7 +109,7 @@
   (setf (config :isearch-previous-string) string
         *isearch-previous-string* string))
 
-
+
 (defgeneric handle-current-highlight (mode overlay))
 
 (defmethod handle-current-highlight (mode overlay)
@@ -124,7 +126,7 @@
     (when (attribute-equal (overlay-attribute ov) 'isearch-highlight-active-attribute)
       (return ov))))
 
-
+
 (defun isearch-overlays (buffer)
   (buffer-value buffer 'isearch-overlays))
 
@@ -168,7 +170,7 @@
     (set-overlay-attribute 'isearch-highlight-active-attribute ov)
     (on-current-highlight ov)))
 
-
+
 (defun isearch-update-buffer (&optional (point (current-point))
                                         (search-string *isearch-string*))
   (let ((buffer (point-buffer point)))
@@ -212,7 +214,7 @@
       (when (string= search-string "")
         (return-from highlight-region nil))
       (with-point ((p start-point))
-        (loop 
+        (loop
           (unless (funcall *isearch-search-forward-function* p search-string end-point)
             (return))
           (when (or (point= start-point p)
@@ -511,7 +513,7 @@
     (list start end)))
 
 (defun mark-by-direction (is-forward buffer)
-  (alexandria:when-let* ((string (or (buffer-value (current-buffer) 'isearch-redisplay-string)
+  (alexandria:when-let* ((string (or (buffer-value buffer 'isearch-redisplay-string)
                                      (and (boundp '*isearch-string*)
                                           *isearch-string*))))
     (let* ((cur-p (current-point))
@@ -540,7 +542,29 @@
 (define-command isearch-add-cursor-to-prev-match () ()
   (mark-by-direction nil (current-buffer)))
 
-
+(defun mark-all (buffer)
+  (alexandria:when-let ((string (or (buffer-value buffer 'isearch-redisplay-string)
+                                    (and (boundp '*isearch-string*)
+                                         *isearch-string*))))
+    (let ((before (length (buffer-cursors buffer))))
+      (declare (type fixnum before))
+      (with-point ((p (buffer-start-point buffer)))
+        (declare (optimize (speed 3) (safety 2)))
+        (loop :while (funcall *isearch-search-forward-function* p string)
+              :do (with-point ((s p))
+                    (funcall *isearch-search-backward-function* s string)
+                    (unless (some (lambda (c) (point= c s))
+                                  (buffer-cursors buffer))
+                      (make-fake-cursor s)))))
+      (let ((after (length (buffer-cursors buffer))))
+        (declare (type fixnum after))
+        (if (> after before)
+            (message "Mark set ~A" after)
+            (message "No more matches found"))))))
+
+(define-command isearch-add-cursor-to-all-matches () ()
+  (mark-all (current-buffer)))
+
 (defvar *replace-before-string* nil)
 (defvar *replace-after-string* nil)
 
