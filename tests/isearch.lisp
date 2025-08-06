@@ -86,3 +86,35 @@ xyz1234
 
         (ok (positions-set-equal '((1 4) (3 4) (5 4))
                                  (all-positions buffer)))))))
+
+(deftest add-cursor-to-all-matches
+  (lem-fake-interface:with-fake-interface ()
+    (lem-core::save-continue-flags
+      (lem-tests/utilities:with-testing-buffer
+          (buffer (lem-tests/utilities:make-text-buffer
+                   (lem-tests/utilities:lines "case 1"
+                                              "//some code here"
+                                              "case 3"
+                                              "//some other code here"
+                                              "case 4"
+                                              "//some other code here")))
+        (lem-core::set-window-buffer buffer (lem:current-window))
+        (lem:execute (lem:buffer-major-mode buffer)
+                     (make-instance 'lem:next-line)
+                     2)
+        (handler-case
+            (lem:execute (lem:buffer-major-mode buffer)
+                         (make-instance 'lem/isearch:isearch-forward-symbol-at-point)
+                         nil)
+          (error (c)
+            (uiop:println c)))
+        (lem:execute (lem:buffer-major-mode buffer)
+                     (make-instance 'lem/isearch:isearch-add-cursor-to-all-matches)
+                     nil)
+        (ok (positions-set-equal '((1 4) (3 4) (5 4))
+                                 (all-positions buffer)))
+        (lem:execute (lem:buffer-major-mode buffer)
+                     (make-instance 'lem/isearch:isearch-abort)
+                     nil)
+        (ok (positions-set-equal '((1 4) (3 4) (5 4))
+                                 (all-positions buffer)))))))
