@@ -383,17 +383,17 @@ current line."
 
 (define-command undo (n) (:universal)
   "Undo."
-  ;; TODO: multiple cursors
-  (dotimes (_ n t)
-    (unless (buffer-undo (current-point))
-      (editor-error "Undo Error"))))
+  (do-each-cursors ()
+    (dotimes (_ n t)
+      (unless (buffer-undo (current-point))
+        (editor-error "Undo Error")))))
 
 (define-command redo (n) (:universal)
   "Redo."
-  ;; TODO: multiple cursors
-  (dotimes (_ n t)
-    (unless (buffer-redo (current-point))
-      (editor-error "Redo Error"))))
+  (do-each-cursors ()
+    (dotimes (_ n t)
+      (unless (buffer-redo (current-point))
+        (editor-error "Redo Error")))))
 
 (defun *crement-aux (fn)
   (let ((point (current-point)))
