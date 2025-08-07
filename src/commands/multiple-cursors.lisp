@@ -83,7 +83,7 @@
              (target       (nth target-index cursors)))
         (declare (type lem:cursor real-cursor target)
                  (type (or null (list lem:cursor)) cursors)
-                 (type fixnum index target-index))
+                 (type integer index target-index))
         (unless (eq target real-cursor)
           (let ((killring (fake-cursor-killring target))
                 (mark (fake-cursor-mark target)))

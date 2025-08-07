@@ -570,7 +570,7 @@
              (current (buffer-point buffer)))
              (declare (type integer string-length)
                       (type function search-fn)
-                      (type function search-backward-fn)
+                      (type function search-back-fn)
                       (type lem/buffer/internal:point current))
         (with-point ((p (buffer-start-point buffer)))
           (declare (type lem/buffer/internal:point p))
