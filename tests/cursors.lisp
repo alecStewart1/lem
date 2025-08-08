@@ -179,3 +179,26 @@
       (ok (equal '(1 2) (linum-and-column (lem:buffer-point buffer))))
       (ok (positions-set-equal '((1 0) (1 1) (1 2) (1 3))
                                (all-positions buffer))))))
+
+(deftest duplicate-cursors-on-same-line
+  (lem-fake-interface:with-fake-interface ()
+    (with-testing-buffer (buffer (make-text-buffer (lines "aaaa" "bbbb")))
+      (lem-core::set-window-buffer buffer (lem:current-window))
+      (let ((p (lem:buffer-point buffer)))
+        (lem:character-offset p 2)
+        (lem:make-fake-cursor p))
+      (lem:execute (lem:buffer-major-mode buffer)
+                   (make-instance 'lem-core/commands/multiple-cursors:add-cursors-to-next-line)
+                   nil)
+      (ok (positions-set-equal '((1 0) (1 2) (2 0) (2 2))
+                               (all-positions buffer))))))
+
+(deftest clear-duplicate-cursors-preserves-columns
+  (lem-fake-interface:with-fake-interface ()
+    (with-testing-buffer (buffer (make-text-buffer (lines "aaaa")))
+      (let ((p (lem:buffer-point buffer)))
+        (lem:character-offset p 2)
+        (lem:make-fake-cursor p))
+      (lem-core/commands/multiple-cursors::clear-duplicate-cursors buffer)
+      (ok (positions-set-equal '((1 0) (1 2))
+                               (all-positions buffer))))))

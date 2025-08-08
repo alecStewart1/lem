@@ -17,10 +17,9 @@
 (define-key *global-keymap* "C-M-Left" 'add-cursors-to-left)
 (define-Key *global-keymap* "C-M-c" 'clear-cursors)
 
-(defun duplicate-cursors (&key line-step char-step move-fn duplicate-p (n 1))
+(defun duplicate-cursors (&key line-step char-step move-fn (n 1))
   (declare (type (or null fixnum) line-step char-step)
            (type (or null function) move-fn)
-           (type function duplicate-p)
            (type fixnum n)
            (optimize (speed 3) (safety 2)))
   (let ((cursors (buffer-cursors (current-buffer))))
@@ -39,31 +38,27 @@
                                        (t nil))))
                       (unless moved (return))
                       (when (or (null next-cursor)
-                                (not (funcall duplicate-p p next-cursor)))
+                                (not (point= p next-cursor)))
                         (make-fake-cursor p))))))))
 
 (define-command add-cursors-to-next-line (n) (:universal)
   "Duplicates the cursor under the currently existing cursors."
   (duplicate-cursors :line-step 1
-                     :duplicate-p #'same-line-p
                      :n n))
 
 (define-command add-cursors-to-previous-line (n) (:universal)
   "Duplicates the cursor above the currently existing cursors."
   (duplicate-cursors :line-step -1
-                     :duplicate-p #'same-line-p
                      :n n))
 
 (define-command add-cursors-to-right (n) (:universal)
   "Duplicates the cursor to the right of the currently existing cursors."
   (duplicate-cursors :char-step 1
-                     :duplicate-p #'point=
                      :n n))
 
 (define-command add-cursors-to-left (n) (:universal)
   "Duplicates the cursor to the left of the currently existing cursors."
   (duplicate-cursors :char-step -1
-                     :duplicate-p #'point=
                      :n n))
 
 (defun cycle-real-cursor (step)
@@ -113,7 +108,7 @@
            (optimize (speed 3) (safety 2)))
   (loop :for (cursor next-cursor) :on (buffer-cursors buffer)
         :do (declare (type lem:cursor cursor next-cursor))
-        :when (and next-cursor (same-line-p cursor next-cursor))
+        :when (and next-cursor (point= cursor next-cursor))
         :do (delete-fake-cursor
              (if (eq cursor (buffer-point buffer))
                  next-cursor

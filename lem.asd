@@ -142,8 +142,9 @@
                (:file "color-theme")
 
                (:module "commands"
-                :serial t
-                :components ((:file "move")
+               :serial t
+                :components ((:file "type-utils")
+                             (:file "move")
                              (:file "edit" :depends-on ("move"))
                              (:file "mark")
                              (:file "word" :depends-on ("edit"))
