@@ -577,6 +577,15 @@
    :delete-fake-cursor
    :merge-cursor-killrings
    :clear-cursors)
+  ;; type-utils.lisp
+  (:export
+   :define-list-type
+   :cursor-list-p
+   :point-list-p
+   :buffer-list-p
+   :cursor-list
+   :point-list
+   :buffer-list)
   ;; typeout.lisp
   (:export
    :*typeout-mode-keymap*

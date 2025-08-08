@@ -140,11 +140,11 @@
                (:file "lem")
 
                (:file "color-theme")
+               (:file "type-utils")
 
                (:module "commands"
                :serial t
-                :components ((:file "type-utils")
-                             (:file "move")
+                :components ((:file "move")
                              (:file "edit" :depends-on ("move"))
                              (:file "mark")
                              (:file "word" :depends-on ("edit"))
