@@ -26,7 +26,8 @@
     (declare (type (list lem:cursor) cursors))
     (loop :for (cursor next-cursor) :on cursors
           :do (with-point ((p cursor))
-                (declare (type lem:cursor cursor next-cursor)
+                (declare (type lem:cursor cursor)
+                         (type (or null lem:cursor) next-cursor)
                          (type lem/buffer/internal:point p))
                 (let ((column (point-charpos p)))
                   (declare (type fixnum column))
@@ -107,7 +108,8 @@
   (declare (type lem:buffer buffer)
            (optimize (speed 3) (safety 2)))
   (loop :for (cursor next-cursor) :on (buffer-cursors buffer)
-        :do (declare (type lem:cursor cursor next-cursor))
+        :do (declare (type lem:cursor cursor)
+                   (type (or null lem:cursor) next-cursor))
         :when (and next-cursor (point= cursor next-cursor))
         :do (delete-fake-cursor
              (if (eq cursor (buffer-point buffer))
