@@ -464,33 +464,41 @@
                                   :query nil))))))
 
 (defun search-next-matched (point n)
+  (declare (type lem/buffer/internal:point point)
+           (type integer n))
   (alexandria:when-let ((string (or (buffer-value (current-buffer) 'isearch-redisplay-string)
                                     (and (boundp '*isearch-string*)
                                          *isearch-string*))))
-    (let ((search-fn
-            (if (plusp n)
-                *isearch-search-forward-function*
-                *isearch-search-backward-function*))
-          (search-previous-fn
-            (if (plusp n)
-                *isearch-search-backward-function*
-                *isearch-search-forward-function*)))
+    (let* ((forwardp (plusp n))
+           (search-fn (if forwardp
+                          *isearch-search-forward-function*
+                          *isearch-search-backward-function*))
+           (search-previous-fn (if forwardp
+                                   *isearch-search-backward-function*
+                                   *isearch-search-forward-function*))
+           (repeat-count (if forwardp
+                             (abs n)
+                             (max 0 (1- (abs n))))))
+      (declare (type (or nil t) forwardp)
+               (type function search-fn search-previous-fn)
+               (type integer repeat-count))
       (with-point ((start point)
                    (end point))
         (funcall search-fn end string)
         (funcall search-previous-fn (move-point start end) string)
         (when (point< end point)
           (move-point point end)))
-      (dotimes (_ (abs n) point)
+      (dotimes (_ repeat-count point)
         (unless (funcall search-fn point string)
           (return nil))))))
 
 (define-command isearch-next-highlight (n) (:universal)
-  (cond ((zerop n) nil)
-        ((minusp n) (search-next-matched (current-point) (1+ n)))
-        (t (search-next-matched (current-point) n))))
+  (declare (type integer n))
+  (unless (zerop n)
+    (search-next-matched (current-point) n)))
 
 (define-command isearch-prev-highlight (n) (:universal)
+  (declare (type integer n))
   (isearch-next-highlight (- n)))
 
 (define-command isearch-toggle-highlighting () ()
@@ -527,22 +535,23 @@
                (type integer string-length))
       (destructuring-bind (start end)
           (determine-start-end-current-search cur-p string is-forward)
-        (let* ((offset-pos (cond
-                             ((and (point= start cur-p) is-forward) string-length)
-                             ((and (point= end cur-p) (not is-forward)) (* -1 string-length))
+        (let* ((pre-offset (cond
+                             ((and is-forward (point= start cur-p)) string-length)
+                             ((and (not is-forward) (point= end cur-p)) (* -1 string-length))
                              (t 0)))
+               (post-offset (if is-forward (- string-length) 0))
                (cursors (buffer-cursors buffer))
                (sorted-cursors (if is-forward (reverse cursors) cursors))
                (cursor (first sorted-cursors)))
-          (declare (type integer offset-pos)
+          (declare (type integer pre-offset post-offset)
                    (type (list lem:cursor) cursors)
                    (type (list lem:cursor) sorted-cursors)
                    (type lem:cursor cursor))
           (with-point ((point cursor))
-            (character-offset point offset-pos)
-            (if (search-next-matched point (if is-forward 1 0))
+            (character-offset point pre-offset)
+            (if (search-next-matched point (if is-forward 1 -1))
                 (progn
-                  (character-offset point (- offset-pos))
+                  (character-offset point post-offset)
                   (make-fake-cursor point)
                   (message "Mark set ~A" (1+ (length cursors))))
                 (message "No more matches found"))))))))
