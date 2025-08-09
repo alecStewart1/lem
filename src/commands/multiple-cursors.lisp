@@ -108,6 +108,7 @@ Can be repeated N times."
     (cycle-real-cursor (- n))))
 
 (defun clear-duplicate-cursors (buffer)
+  "Clear all duplicate (fake) cursors in BUFFER."
   (declare (type lem:buffer buffer)
            (optimize (speed 3) (safety 2)))
   (loop :for (cursor next-cursor) :on (buffer-cursors buffer)
@@ -126,13 +127,16 @@ Can be repeated N times."
     (clear-duplicate-cursors buffer)))
 
 (defun garbage-collection-cursors ()
+  "Function to run to clear all duplicate (fake) cursors on `*post-command-hook*`."
   (clear-duplicate-cursors (current-buffer)))
 
 (add-hook *post-command-hook* 'garbage-collection-cursors)
 
 (defun clear-cursors-when-aborted ()
-  (let ((string (merge-cursor-killrings (current-buffer))))
+  "Function to run to clear all duplicate (fake) cursors on `*editor-abort-hook*`."
+  (let ((str (merge-cursor-killrings (current-buffer))))
+    (declare (type string str))
     (clear-cursors (current-buffer))
-    (copy-to-clipboard-with-killring string)))
+    (copy-to-clipboard-with-killring str)))
 
 (add-hook *editor-abort-hook* 'clear-cursors-when-aborted)
