@@ -18,9 +18,12 @@
 (define-Key *global-keymap* "C-M-c" 'clear-cursors)
 
 (defun duplicate-cursors (&key line-step char-step move-fn (n 1))
-  (declare (type (or null fixnum) line-step char-step)
+  "Create a duplicate (fake) cursor by LINE-STEP (line above or below) or CHAR-STEP (character left or right).
+MOVE-FN can be specified where to place a duplicate (fake) cursor if it's not a simple up/down/left/right.
+Can be repeated N times."
+  (declare (type (or null integer) line-step char-step)
            (type (or null function) move-fn)
-           (type fixnum n)
+           (type integer n)
            (optimize (speed 3) (safety 2)))
   (let ((cursors (buffer-cursors (current-buffer))))
     (declare (type (list lem:cursor) cursors))
@@ -30,7 +33,7 @@
                          (type (or null lem:cursor) next-cursor)
                          (type lem/buffer/internal:point p))
                 (let ((column (point-charpos p)))
-                  (declare (type fixnum column))
+                  (declare (type integer column))
                   (dotimes (i (or n 1))
                     (declare (ignore i))
                     (let ((moved (cond (move-fn (funcall move-fn p))
