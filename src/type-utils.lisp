@@ -10,7 +10,7 @@ current package."
   (declare (type symbol name element-type)
            (type list predicate-ftype)
            (type (or nil t) export))
-  (let* ((pred (intern (format nil "~A-p" (symbol-name name)) (symbol-package name)))
+  (let* ((pred (intern (format nil "~A-P" (symbol-name name)) (symbol-package name)))
          (pred-doc (format nil "Return T if every element of LST is a ~A. Returns NIL otherwise." element-type))
          (type-doc (format nil "A non-empty list whose elements are of type ~A." element-type)))
     (declare (type symbol pred)
