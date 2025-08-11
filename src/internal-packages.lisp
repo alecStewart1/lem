@@ -629,6 +629,7 @@
    :implementation
    :redraw-after-modifying-floating-window
    :support-floating-window
+   :html-support-p
    :set-foreground
    :set-background
    :display-width
@@ -640,7 +641,11 @@
    :attribute-foreground-with-reverse
    :attribute-background-with-reverse
    :cursor-type
-   :display-background-mode)
+   :display-background-mode
+   :get-font
+   :set-font
+   :set-font-name
+   :set-font-size)
   ;; color-theme.lisp
   (:export
    :color-theme-names
@@ -678,7 +683,10 @@
   ;; site-init.lisp
   (:export
    :*inits-directory-name*
-   :load-site-init))
+   :load-site-init)
+  ;; system.lisp
+  (:export 
+   :exec-path))
 #+sbcl
 (sb-ext:lock-package :lem-core)
 
@@ -736,14 +744,15 @@
    :display-context-menu
    :clipboard-paste
    :clipboard-copy
+   :update-screen-size
    :increase-font-size
    :decrease-font-size
+   :set-font-name
    :set-font-size
    :resize-display-before
    :get-font-list
    :get-font-by-name-and-style
-   :set-font-with-implementation
-   :set-font-name
+   :get-font
    :get-mouse-position
    :get-char-width
    :get-char-height

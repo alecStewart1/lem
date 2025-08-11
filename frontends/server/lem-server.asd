@@ -1,5 +1,5 @@
 (defsystem "lem-server"
-  :depends-on ("lem"
+  :depends-on ("lem/core"
                "lem/extensions"
                "jsonrpc"
                "jsonrpc/transport/stdio"
@@ -12,4 +12,6 @@
                (:file "utils")
                (:file "view")
                (:file "mouse")
-               (:file "main")))
+               (:file "icon")
+               (:file "main")
+               (:file "color-picker")))

@@ -14,8 +14,7 @@
     ;;   ref. https://github.com/roswell/roswell/blob/5b267381a66d36a514e2eee7283543f828541a63/lisp/util-install-quicklisp.lisp#L146
     (set (intern (string :*local-project-directories*) :ql) local-project-dir)))
 
-(defsystem "lem"
-  :version "2.3.0"
+(defsystem "lem/core"
   :depends-on ("iterate"
                "closer-mop"
                "trivia"
@@ -32,6 +31,7 @@
                "split-sequence"
                "str"
                "dexador"
+               "cl-mustache"
                ;; "lem-encodings"
                #+sbcl
                sb-concurrency
@@ -217,7 +217,8 @@
                              (:file "themes")
                              (:file "detective")
                              (:file "extension-commands" :if-feature :quicklisp)
-                             (:file "read-only-sources")))
+                             (:file "read-only-sources")
+                             (:file "image-buffer")))
 
                (:module "ui"
                 :serial t
@@ -281,8 +282,15 @@
                "lem-dashboard"
                "lem-copilot"))
 
-(defsystem "lem/executable"
-  :build-operation program-op
+(defsystem "lem"
+  :version "2.3.0"
+  :defsystem-depends-on ("deploy")
+  :build-operation #+os-macosx "osx-app-deploy-op" #-os-macosx "deploy-op"
   :build-pathname "lem"
-  :entry-point "lem:main"
-  :depends-on ("lem-ncurses"))
+  :entry-point "lem-webview:lem-main"
+  :depends-on ("lem-webview"
+               "lem-server"
+               #-os-macosx ; workaround: because (adf:make :lem) fails
+               "lem-ncurses")
+  :pathname "src"
+  :components ((:file "macosx" :if-feature :os-macosx)))

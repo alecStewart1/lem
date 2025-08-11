@@ -18,7 +18,11 @@
    (window-left-margin
     :initform 1
     :initarg :window-left-margin
-    :reader window-left-margin)))
+    :reader window-left-margin)
+   (html-support
+    :initform nil
+    :initarg :html-support
+    :reader html-support-p)))
 
 (defun get-default-implementation (&key (errorp t) (implementation :ncurses))
   (let* ((classes (c2mop:class-direct-subclasses (find-class 'implementation)))
@@ -98,6 +102,8 @@
   (:method (implementation)))
 (defgeneric lem-if:decrease-font-size (implementation)
   (:method (implementation)))
+(defgeneric lem-if:set-font-name (implementation font-name)
+  (:method (implementation font-name) '()))
 (defgeneric lem-if:set-font-size (implementation size)
   (:method (implementation size)))
 
@@ -107,8 +113,8 @@
 (defgeneric lem-if:get-font-list (implementation)
   (:method (implementation) '()))
 
-(defgeneric lem-if:set-font-with-implementation (implementation font-name)
-  (:method (implementation font-name) '()))
+(defgeneric lem-if:get-font (implementation)
+  (:method (implementation) (values nil nil)))
 
 (defgeneric lem-if:get-mouse-position (implementation)
   (:method (implementation)
@@ -187,13 +193,26 @@
 (defun (setf display-fullscreen-p) (fullscreen-p)
   (lem-if:set-display-fullscreen-p (implementation) fullscreen-p))
 
+(defgeneric lem-if:update-screen-size (implementation)
+  (:method (implementation)))
+
+(defun set-font-name (font-name)
+  (lem-if:set-font-name (implementation) font-name)
+  (lem-if:update-screen-size (implementation)))
+
+(defun set-font-size (font-size)
+  (lem-if:set-font-size (implementation) font-size)
+  (lem-if:update-screen-size (implementation)))
+
+(defun set-font (&key (name nil name-p) (size nil size-p))
+  (when name-p (lem-if:set-font-name (implementation) name))
+  (when size-p (lem-if:set-font-size (implementation) size))
+  (lem-if:update-screen-size (implementation)))
+
 (defun invoke-frontend (function &key (implementation
                                        (get-default-implementation)))
   (setf *implementation* implementation)
   (lem-if:invoke implementation function))
-
-(defun lem-if:set-font-name (font-name)
-  (lem-if:set-font-with-implementation (implementation) font-name))
 
 (defun lem-if:get-font-by-name-and-style (name style)
   "GET-FONT-BY-NAME-AND-STYLE searches for a font with NAME in the path and ends with STYLE"

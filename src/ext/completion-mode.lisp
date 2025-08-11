@@ -7,7 +7,8 @@
            :completion-item-detail
            :run-completion
            :completion-end
-           :completion-mode)
+           :completion-mode
+           :completion-refresh)
   #+sbcl
   (:lock t))
 (in-package :lem/completion-mode)
@@ -88,6 +89,10 @@
     :reader completion-item-focus-action
     :type (or null function))))
 
+(defmethod print-object ((obj completion-item) stream)
+  (print-unreadable-object (obj stream :type t)
+    (format stream "label: ~a" (completion-item-label obj))))
+
 (defun make-completion-item (&rest initargs
                              &key label chunks detail start end focus-action)
   (declare (ignore label chunks detail start end focus-action))
@@ -111,6 +116,8 @@
 (define-key *completion-mode-keymap* "Space"    'completion-insert-space-and-cancel)
 (define-key *completion-mode-keymap* 'delete-previous-char 'completion-delete-previous-char)
 (define-key *completion-mode-keymap* 'backward-delete-word 'completion-backward-delete-word)
+(define-key *completion-mode-keymap* "Up" 'completion-previous-line)
+(define-key *completion-mode-keymap* "Down" 'completion-next-line)
 
 (define-attribute detail-attribute
   (t :foreground :base03))
@@ -185,13 +192,18 @@
           (t (unread-key-sequence (last-read-key-sequence))
              (completion-end)))))
 
+(defun completion-refresh ()
+  "This will refresh the contents of the completion window using any changes made in the interim"
+  (when *completion-context*
+    (continue-completion *completion-context*)))
+
 (define-command completion-delete-previous-char (n) (:universal)
   (delete-previous-char n)
-  (continue-completion *completion-context*))
+  (completion-refresh))
 
 (define-command completion-backward-delete-word (n) (:universal)
   (backward-delete-word n)
-  (continue-completion *completion-context*))
+  (completion-refresh))
 
 (define-command completion-next-line () ()
   (popup-menu-down (context-popup-menu *completion-context*))
