@@ -167,13 +167,13 @@ jobs:
           files=""
           [ -f download/Lem-x86_64.AppImage ] && files="$files"$'\n'"download/Lem-x86_64.AppImage"
           [ -f download/lem-macos.zip ] && files="$files"$'\n'"download/lem-macos.zip"
-          files="${files#"${files%%[!$'\n']*}"}"   # trim leading newlines
+          files="${files#"${files%%[!$'\n']*}"}"
           echo "files<<EOF" >> "$GITHUB_OUTPUT"
           echo "$files" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
           if [ -z "$files" ]; then
             echo "No artifacts found to release."
-            exit 78  # neutral (skips next step if conditionally checked)
+            exit 78
           fi
 
       - name: Move/update nightly tag to current commit
@@ -188,7 +188,7 @@ jobs:
         if: steps.collect.outputs.files != ''
         with:
           tag_name: ${{ env.NIGHTLY_TAG }}
-          name: Nightly Build (Linux/macOS) - ${{ steps.date.outputs.date }}
+          name: Nightly Build - ${{ steps.date.outputs.date }}
           prerelease: true
           generate_release_notes: false
           files: ${{ steps.collect.outputs.files }}

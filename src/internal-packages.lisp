@@ -248,6 +248,7 @@
    :*prompt-buffer-completion-function*
    :*prompt-file-completion-function*
    :*prompt-command-completion-function*
+   :*automatic-tab-completion*
    :caller-of-prompt-window
    :prompt-active-p
    :active-prompt-window
@@ -601,6 +602,7 @@
    :find-editor-thread
    :init-at-build-time
    :lem
+   :launch
    :main)
   ;; command-advices.lisp
   (:export
@@ -622,7 +624,7 @@
    :compute-wrap-left-area-content)
   ;; display/logical-line.lisp
   (:export
-    :make-region-overlays-using-global-mode)
+   :make-region-overlays-using-global-mode)
   ;; interface.lisp
   (:export
    :with-implementation
@@ -630,6 +632,7 @@
    :redraw-after-modifying-floating-window
    :support-floating-window
    :html-support-p
+   :underline-color-support-p
    :set-foreground
    :set-background
    :display-width
@@ -686,7 +689,17 @@
    :load-site-init)
   ;; system.lisp
   (:export 
-   :exec-path))
+   :exec-path)
+  ;; command-line-arguments
+  (:export
+   :parse-args
+   :command-line-arguments-help
+   :command-line-arguments-debug
+   :command-line-arguments-version
+   :command-line-arguments-without-init-file
+   :command-line-arguments-log-filename
+   :command-line-arguments-interface
+   :command-line-arguments-filenames))
 #+sbcl
 (sb-ext:lock-package :lem-core)
 

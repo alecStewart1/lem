@@ -4,7 +4,7 @@
                "jsonrpc"
                "jsonrpc/transport/stdio"
                "jsonrpc/transport/websocket"
-               "jsonrpc/transport/local-domain-socket"
+               #-os-windows "jsonrpc/transport/local-domain-socket"
                "command-line-arguments")
   :serial t
   :components ((:file "jsonrpc-stdio-patch")
@@ -14,4 +14,5 @@
                (:file "mouse")
                (:file "icon")
                (:file "main")
+               (:file "tabbar")
                (:file "color-picker")))

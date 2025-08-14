@@ -7,16 +7,13 @@
   (:export :prompt-attribute
            :*prompt-completion-window-shape*
            :*automatic-tab-completion*
-           :current-prompt-window))
+           :current-prompt-window
+           :find-command-keybindings-in-keymap))
 (in-package :lem/prompt-window)
 
 (defconstant +border-size+ 1)
 (defconstant +min-width+   10)
 (defconstant +min-height+  1)
-
-(defvar *automatic-tab-completion* t 
-  "When set to true, the completion list is opened instantly.
-When set to false, the completion list only opens when the user presses TAB")
 
 (defvar *fill-width* nil)
 (defvar *history-table* (make-hash-table))
@@ -73,7 +70,8 @@ When set to false, the completion list only opens when the user presses TAB")
     (:name "prompt"
      :keymap *prompt-mode-keymap*)
   (setf (not-switchable-buffer-p (current-buffer)) t)
-  (setf (variable-value 'line-wrap :buffer (current-buffer)) nil))
+  (setf (variable-value 'line-wrap :buffer (current-buffer)) nil)
+  (setf (variable-value 'highlight-line :buffer (current-buffer)) nil))
 
 (define-attribute prompt-attribute
   (t :foreground :base07 :bold t))
@@ -500,7 +498,7 @@ When set to false, the completion list only opens when the user presses TAB")
                            items
                            :key #'lem/completion-mode:completion-item-label))))
 
-    (let* ((all-items (collect-items (all-command-names)))
+    (let* ((all-items (collect-items (sort (all-command-names) #'string<)))
            (candidate-items (collect-items candidates))
            (items (remove-duplicates
                    (append candidate-items all-items)
