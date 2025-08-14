@@ -12,7 +12,7 @@
          (cursors (buffer-cursors buffer)))
     (declare (type lem:buffer buffer)
              (type lem/buffer/internal:point current)
-             (type (list lem:cursor) cursors)
+             (type cursor-list cursors)
              (optimize (speed 3) (safety 2)))
     (dolist (point cursors)
       (unless (eq point current)            ; skip the real cursor

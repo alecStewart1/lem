@@ -107,9 +107,12 @@
   (values))
 
 (defun buffer-cursors (buffer)
-  (sort (copy-list (cons (buffer-point buffer)
-                         (buffer-fake-cursors buffer)))
-        #'point<))
+  (declare (type lem:buffer buffer)
+           (optimize (speed 3) (safety 2)))
+  (the cursor-list
+    (sort (copy-list (cons (buffer-point buffer)
+                           (buffer-fake-cursors buffer)))
+          #'point<)))
 
 (defun merge-cursor-killrings (buffer)
   (with-output-to-string (out)

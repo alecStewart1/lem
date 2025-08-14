@@ -26,7 +26,7 @@ Can be repeated N times."
            (type integer n)
            (optimize (speed 3) (safety 2)))
   (let ((cursors (buffer-cursors (current-buffer))))
-    (declare (type (list lem:cursor) cursors))
+    (declare (type cursor-list cursors))
     (loop :for (cursor next-cursor) :on cursors
           :do (with-point ((p cursor))
                 (declare (type lem:cursor cursor)
@@ -73,7 +73,7 @@ Can be repeated N times."
   (let* ((buffer (current-buffer))
          (fake-cursors (buffer-fake-cursors buffer)))
     (declare (type lem:buffer buffer)
-             (type (or null (list fake-cursor)) fake-cursors))
+             (type (or null cursor-list) fake-cursors))
     (when fake-cursors
       (let* ((real-cursor  (buffer-point buffer))
              (cursors      (buffer-cursors buffer))
@@ -81,7 +81,7 @@ Can be repeated N times."
              (target-index (mod (+ index step) (length cursors)))
              (target       (nth target-index cursors)))
         (declare (type lem:cursor real-cursor target)
-                 (type (or null (list lem:cursor)) cursors)
+                 (type cursor-list cursors)
                  (type integer index target-index))
         (unless (eq target real-cursor)
           (let ((killring (fake-cursor-killring target))
@@ -111,14 +111,16 @@ Can be repeated N times."
   "Clear all duplicate (fake) cursors in BUFFER."
   (declare (type lem:buffer buffer)
            (optimize (speed 3) (safety 2)))
-  (loop :for (cursor next-cursor) :on (buffer-cursors buffer)
-        :do (declare (type lem:cursor cursor)
-                   (type (or null lem:cursor) next-cursor))
-        :when (and next-cursor (point= cursor next-cursor))
-        :do (delete-fake-cursor
-             (if (eq cursor (buffer-point buffer))
-                 next-cursor
-                 cursor))))
+  (let ((cursors (buffer-cursors buffer)))
+    (declare (type cursor-list cursors))
+    (loop :for (cursor next-cursor) :on cursors
+          :do (declare (type lem:cursor cursor)
+                     (type (or null lem:cursor) next-cursor))
+          :when (and next-cursor (point= cursor next-cursor))
+          :do (delete-fake-cursor
+               (if (eq cursor (buffer-point buffer))
+                   next-cursor
+                   cursor)))))
 
 (define-command clear-cursors () ()
   "Clear all cursors in the current buffer."
