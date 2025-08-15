@@ -77,7 +77,7 @@ Can be repeated N times."
                  (type (list lem-core:cursor) cursors)
                  (type integer index target-index))
         (unless (eq target real-cursor)
-          (let ((killring (fake-cursor-killring target))
+          (let ((killring (lem-core::fake-cursor-killring target))
                 (mark (fake-cursor-mark target)))
             (make-fake-cursor real-cursor)
             (move-point real-cursor target)
