@@ -10,9 +10,9 @@
   (let* ((buffer (current-buffer))
          (current (buffer-point buffer))
          (cursors (buffer-cursors buffer)))
-    (declare (type lem:buffer buffer)
-             (type lem/buffer/internal:point current)
-             (type cursor-list cursors)
+    (declare (type lem-core:buffer buffer)
+             (type lem-core:point current)
+             (type (list lem-core:cursor) cursors)
              (optimize (speed 3) (safety 2)))
     (dolist (point cursors)
       (unless (eq point current)            ; skip the real cursor

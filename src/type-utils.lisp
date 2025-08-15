@@ -38,6 +38,6 @@ from the current package."
              (export ',pred)
              (export ',name))))))
 
-(define-list-type cursor-list lem:cursor :export t)
-(define-list-type point-list lem/buffer/internal:point :export t)
-(define-list-type buffer-list lem:buffer :export t)
+(define-list-type cursor-list lem-core:cursor :export t)
+(define-list-type point-list lem-core:point :export t)
+(define-list-type buffer-obj-list lem-core:buffer :export t)

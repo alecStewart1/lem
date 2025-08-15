@@ -583,10 +583,10 @@
    :define-list-type
    :cursor-list-p
    :point-list-p
-   :buffer-list-p
+   :buffer-obj-list-p
    :cursor-list
    :point-list
-   :buffer-list)
+   :buffer-obj-list)
   ;; typeout.lisp
   (:export
    :*typeout-mode-keymap*
@@ -688,7 +688,7 @@
    :*inits-directory-name*
    :load-site-init)
   ;; system.lisp
-  (:export 
+  (:export
    :exec-path)
   ;; command-line-arguments
   (:export

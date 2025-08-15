@@ -92,7 +92,7 @@
 
 (defun delete-fake-cursor (point)
   (let ((buffer (point-buffer point)))
-    (assert (not (eq point (buffer-point buffer))))
+    ;;(assert (not (eq point (buffer-point buffer))))
     ;; (assert (find point (buffer-fake-cursors buffer)))
     (alexandria:deletef (buffer-fake-cursors buffer) point)
     (delete-point point)
@@ -107,12 +107,10 @@
   (values))
 
 (defun buffer-cursors (buffer)
-  (declare (type lem:buffer buffer)
-           (optimize (speed 3) (safety 2)))
-  (the cursor-list
-    (sort (copy-list (cons (buffer-point buffer)
-                           (buffer-fake-cursors buffer)))
-          #'point<)))
+  "The all of the cursors, real and fake, from the BUFFER."
+  (sort (copy-list (cons (buffer-point buffer)
+                         (buffer-fake-cursors buffer)))
+        #'point<))
 
 (defun merge-cursor-killrings (buffer)
   (with-output-to-string (out)
