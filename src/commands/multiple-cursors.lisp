@@ -17,7 +17,7 @@
 (define-key *global-keymap* "C-M-Left" 'add-cursors-to-left)
 (define-Key *global-keymap* "C-M-c" 'clear-all-cursors)
 
-(defun duplicate-cursors (&key line-step char-step move-fn (n 1))
+(defun duplicate-cursors (&key line-step char-step move-fn)
   "Create a duplicate (fake) cursor by LINE-STEP (line above or below) or CHAR-STEP (character left or right).
 MOVE-FN can be specified where to place a duplicate (fake) cursor if it's not a simple up/down/left/right.
 Can be repeated N times."
@@ -28,40 +28,34 @@ Can be repeated N times."
           :do (with-point ((p cursor))
                 (let ((column (point-charpos p)))
                   (declare (type integer column))
-                  (dotimes (i (or n 1))
-                    (declare (ignore i))
-                    (let ((moved (cond (move-fn (funcall move-fn p))
-                                       (line-step (line-offset p line-step (or char-step column)))
-                                       (char-step (character-offset p char-step))
-                                       (t nil))))
-                      (unless moved (return))
-                      (when (or (null next-cursor)
-                                (not (point= p next-cursor)))
-                        (make-fake-cursor p)))))))))
+                  (let ((moved (cond (move-fn (funcall move-fn p))
+                                     (line-step (line-offset p line-step (or char-step column)))
+                                     (char-step (character-offset p char-step))
+                                     (t nil))))
+                    (unless moved (return))
+                    (when (or (null next-cursor)
+                              (not (point= p next-cursor)))
+                      (make-fake-cursor p))))))))
 
 (define-command add-cursors-to-next-line (n) (:universal)
   "Duplicates the cursor under the currently existing cursors."
-  (duplicate-cursors :line-step 1
-                     :n n))
+  (duplicate-cursors :line-step n))
 
 (define-command add-cursors-to-previous-line (n) (:universal)
   "Duplicates the cursor above the currently existing cursors."
-  (duplicate-cursors :line-step -1
-                     :n n))
+  (duplicate-cursors :line-step (- 0 n)))
 
 (define-command add-cursors-to-right (n) (:universal)
   "Duplicates the cursor to the right of the currently existing cursors."
-  (duplicate-cursors :char-step 1
-                     :n n))
+  (duplicate-cursors :char-step n))
 
 (define-command add-cursors-to-left (n) (:universal)
   "Duplicates the cursor to the left of the currently existing cursors."
-  (duplicate-cursors :char-step -1
-                     :n n))
+  (duplicate-cursors :char-step (- 0 n)))
 
 (defun cycle-real-cursor (step)
   "Move the real cursor to take next or previous fake cursor position by STEP.
-  Works both horizontally and vertically, as it is based on buffer positions."
+Works both horizontally and vertically, as it is based on buffer positions."
   (let* ((buffer (current-buffer))
          (fake-cursors (buffer-fake-cursors buffer)))
     (declare (type lem-core:buffer buffer)
@@ -78,7 +72,7 @@ Can be repeated N times."
                  (type integer index target-index))
         (unless (eq target real-cursor)
           (let ((killring (lem-core::fake-cursor-killring target))
-                (mark (fake-cursor-mark target)))
+                (mark (lem-core::fake-cursor-mark target)))
             (make-fake-cursor real-cursor)
             (move-point real-cursor target)
             (setf lem-core::*killring* killring)
