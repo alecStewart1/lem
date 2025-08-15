@@ -78,7 +78,7 @@ Works both horizontally and vertically, as it is based on buffer positions."
             (setf lem-core::*killring* killring)
             (when (mark-active-p mark)
               (set-cursor-mark real-cursor (copy-point (mark-point mark))))
-            (delete-fake-cursor target)))))))
+            (lem-core::delete-fake-cursor target)))))))
 
 (define-command move-to-next-fake-cursor (n) (:universal-nil)
   "Move the real cursor to the Nth next fake cursor."
@@ -99,7 +99,7 @@ Works both horizontally and vertically, as it is based on buffer positions."
              (optimize (speed 3) (safety 2)))
     (loop :for (cursor next-cursor) :on cursors
           :when (and next-cursor (point= cursor next-cursor))
-          :do (delete-fake-cursor
+          :do (lem-core::delete-fake-cursor
                (if (eq cursor (buffer-point buffer))
                    next-cursor
                    cursor)))))
