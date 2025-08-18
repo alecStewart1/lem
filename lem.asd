@@ -112,7 +112,8 @@
                              (:file "virtual-line")
                              (:file "floating-window")
                              (:file "header-window")
-                             (:file "side-window")))
+                             (:file "side-window")
+                             (:file "attached-window")))
                (:file "buffer-ext") ; TODO
                (:file "popup")
                (:file "modeline")
@@ -185,6 +186,7 @@
                              (:file "button")
                              (:file "loading-spinner")
                              (:file "listener-mode")
+                             (:file "interactive-mode")
                              (:file "universal-argument")
                              (:file "kbdmacro")
                              (:file "isearch")
@@ -236,15 +238,15 @@
                "lem-swift-mode"
 
                "lem-c-mode"
-               "lem-xml-mode"
-               "lem-html-mode"
                "lem-python-mode"
                "lem-posix-shell-mode"
+               "lem-xml-mode"
                "lem-js-mode"
+               "lem-css-mode"
+               "lem-html-mode"
                "lem-vue-mode"
                "lem-typescript-mode"
                "lem-json-mode"
-               "lem-css-mode"
                "lem-rust-mode"
                "lem-paredit-mode"
                "lem-nim-mode"
