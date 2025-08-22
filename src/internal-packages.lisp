@@ -636,6 +636,7 @@
    :support-floating-window
    :html-support-p
    :underline-color-support-p
+   :no-force-needed-p
    :set-foreground
    :set-background
    :display-width

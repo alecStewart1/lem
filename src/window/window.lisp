@@ -475,6 +475,8 @@ You can pass in the optional argument WINDOW-LIST to replace the default
 
 (defun window-set-pos (window x y)
   "Make point value in WINDOW be at position X and Y in WINDOW’s buffer."
+  (when (and (= x (window-x window)) (= y (window-y window)))
+    (return-from window-set-pos))
   (notify-frame-redisplay-required (current-frame))
   (when (floating-window-p window)
     (notify-floating-window-modified (current-frame)))
@@ -497,6 +499,9 @@ You can pass in the optional argument WINDOW-LIST to replace the default
   "Resize WINDOW to the same WIDTH and HEIGHT."
   (assert (valid-window-width-p width))
   (assert (valid-window-height-p height))
+  (when (and (= width (window-width window))
+             (= height (window-height window)))
+    (return-from window-set-size))
   (notify-frame-redisplay-required (current-frame))
   (when (floating-window-p window)
     (notify-floating-window-modified (current-frame)))
