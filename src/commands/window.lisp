@@ -63,7 +63,8 @@
 
 (defun maybe-balance-windows ()
   (when *balance-after-split-window*
-    (balance-windows)))
+    (let ((lem-core::*update-only-when-state-changed* t))
+      (balance-windows))))
 
 (eval-when (:compile-toplevel :load-toplevel)
   (defmacro define-next-window-command (command prompt documentation)
@@ -187,34 +188,36 @@
 
 (define-command delete-other-windows () ()
   "Delete all other windows."
-  (labels ((f ()
-             (let* ((is-attached (attached-window-p (current-window)))
-                    (window (if is-attached
-                                (lem-core::attached-window-parent-window (current-window))
-                                (current-window))))
-               (when (floating-window-p window)
-                 (editor-error "Can not keep active window as the only one"))
-               (dolist (win (window-list))
-                 (unless (eq win window)
-                   (delete-window win)))
-               (unless is-attached
-                 (window-set-pos window
-                                 (topleft-window-x (current-frame))
-                                 (topleft-window-y (current-frame)))
-                 (window-set-size window
-                                  (max-window-width (current-frame))
-                                  (max-window-height (current-frame)))))))
-    (if (attached-window-p (current-window))
-        (with-current-window (lem-core::attached-window-parent-window (current-window))
-          (f))
-        (f))))
+  (let ((lem-core::*update-only-when-state-changed* t))
+    (labels ((f ()
+               (let* ((is-attached (attached-window-p (current-window)))
+                      (window (if is-attached
+                                  (lem-core::attached-window-parent-window (current-window))
+                                  (current-window))))
+                 (when (floating-window-p window)
+                   (editor-error "Can not keep active window as the only one"))
+                 (dolist (win (window-list))
+                   (unless (eq win window)
+                     (delete-window win)))
+                 (unless is-attached
+                   (window-set-pos window
+                                   (topleft-window-x (current-frame))
+                                   (topleft-window-y (current-frame)))
+                   (window-set-size window
+                                    (max-window-width (current-frame))
+                                    (max-window-height (current-frame)))))))
+      (if (attached-window-p (current-window))
+          (with-current-window (lem-core::attached-window-parent-window (current-window))
+            (f))
+          (f)))))
 
 (define-command delete-active-window () ()
   "Delete the active window."
-  (delete-window (if (attached-window-p (current-window))
-                     (lem-core::attached-window-parent-window (current-window))
-                     (current-window)))
-  (maybe-balance-windows))
+  (let ((lem-core::*update-only-when-state-changed* t))
+    (delete-window (if (attached-window-p (current-window))
+                       (lem-core::attached-window-parent-window (current-window))
+                       (current-window)))
+    (maybe-balance-windows)))
 
 (define-command quit-active-window (&optional kill-buffer) (:universal-nil)
   "Quit the active window. This is a command for a popped-up window."

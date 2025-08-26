@@ -126,6 +126,12 @@
     :initarg :buffer-switchable
     :accessor window-buffer-switchable-p)))
 
+(defmethod window-use-modeline-p ((window window))
+  (and (not (header-window-p window))
+       (not (floating-window-p window))
+       (not (attached-window-p window))
+       (frame-enable-window-modeline-per-window (current-frame))))
+
 (defun need-to-redraw (window)
   (setf (window-need-to-redraw-p window) t))
 
@@ -356,7 +362,7 @@ window width is changed, we must recalc the window view point."
   (window-set-size current-window
                    (window-width current-window)
                    (window-height current-window)
-                   :update-even-if-same-size t)
+                   t)
   (move-point (window-view-point new-window)
               (window-view-point current-window))
   (move-point (%window-point new-window)
@@ -405,9 +411,11 @@ height, or close to it."
   (let ((new-window
           (make-window (window-buffer window)
                        (window-x window)
-                       (+ (window-y window) height)
+                       (+ (frame-window-bottom-margin (current-frame))
+                          (window-y window)
+                          height)
                        (window-width window)
-                       (- (window-height window) height)
+                       (- (window-height window) height (frame-window-bottom-margin (current-frame)))
                        t)))
     (set-window-height height window)
     (split-window-after window new-window :vsplit)))
@@ -434,7 +442,8 @@ close to it."
   (let ((new-window
           (make-window (window-buffer window)
                        (+ (frame-window-left-margin (current-frame))
-                          (window-x window) width)
+                          (window-x window)
+                          width)
                        (window-y window)
                        (- (window-width window)
                           width
@@ -474,10 +483,14 @@ You can pass in the optional argument WINDOW-LIST to replace the default
         (cadr result)
         (car window-list))))
 
-(defun window-set-pos (window x y)
+(defvar *update-only-when-state-changed* nil)
+
+(defun window-set-pos (window x y &optional (update-only-when-state-changed *update-only-when-state-changed*))
   "Make point value in WINDOW be at position X and Y in WINDOW’s buffer."
-  (when (and (= x (window-x window)) (= y (window-y window)))
-    (return-from window-set-pos))
+  (unless update-only-when-state-changed
+    (when (and (= x (window-x window))
+               (= y (window-y window)))
+      (return-from window-set-pos)))
   (notify-frame-redisplay-required (current-frame))
   (when (floating-window-p window)
     (notify-floating-window-modified (current-frame)))
@@ -488,7 +501,7 @@ You can pass in the optional argument WINDOW-LIST to replace the default
   (when (window-attached-window window)
     (multiple-value-bind (x y)
         (compute-attached-window-position window)
-      (window-set-pos (window-attached-window window) x y))))
+      (window-set-pos (window-attached-window window) x y t))))
 
 (defun valid-window-height-p (height)
   (plusp height))
@@ -496,11 +509,11 @@ You can pass in the optional argument WINDOW-LIST to replace the default
 (defun valid-window-width-p (width)
   (< 2 width))
 
-(defun window-set-size (window width height &key update-even-if-same-size)
+(defun window-set-size (window width height &optional (update-only-when-state-changed *update-only-when-state-changed*))
   "Resize WINDOW to the same WIDTH and HEIGHT."
   (assert (valid-window-width-p width))
   (assert (valid-window-height-p height))
-  (unless update-even-if-same-size
+  (unless update-only-when-state-changed
     (when (and (= width (window-width window))
                (= height (window-height window)))
       (return-from window-set-size)))
