@@ -399,42 +399,43 @@ Move the cursor to the first non-blank character of the line."
 
 (define-operator vi-delete (start end type) ("<R>")
     (:move-point nil)
-  (when (point= start end)
-    ;; 'dd' on the empty line at the end of a buffer deletes trailing newlines,
-    ;; but only if the buffer is not empty (i.e. cursor is not at the start of buffer)
-    (if (and (eq 'vi-delete (command-name (this-command)))
-             (not (this-motion-command))
-             (not (start-buffer-p end)))
-        (character-offset end -1)
-        (return-from vi-delete)))
-  (let ((pos (point-charpos (current-point)))
-        (ends-with-newline (and (character-at end -1)
-                                (char= (character-at end -1) #\Newline)))
-        (column-start (point-column start))
-        (column-end (point-column end)))
-    (delete-region start end :type type)
-    (when (and (eq type :line)
-               (not ends-with-newline)
-               (not (= (position-at-point start) 1)))
-      (delete-previous-char))
-    (when (eq 'vi-delete (command-name (this-command)))
-      (case type
-        (:line
-         (move-to-column (current-point)
-                         (max 0
-                              (min (1- (length (line-string (current-point)))) pos))))
-        (:block
-         (move-to-line (current-point) (min (line-number-at-point start)
+  (lem-core:do-each-cursors ()
+    (when (point= start end)
+      ;; 'dd' on the empty line at the end of a buffer deletes trailing newlines,
+      ;; but only if the buffer is not empty (i.e. cursor is not at the star  t of buffer)
+      (if (and (eq 'vi-delete (command-name (this-command)))
+               (not (this-motion-command))
+               (not (start-buffer-p end)))
+          (character-offset end -1)
+          (return-from vi-delete)))
+    (let ((pos (point-charpos (current-point)))
+          (ends-with-newline (and (character-at end -1)
+                                  (char= (character-at end -1) #\Newline)))
+          (column-start (point-column start))
+          (column-end (point-column end)))
+      (delete-region start end :type type)
+      (when (and (eq type :line)
+                 (not ends-with-newline)
+                 (not (= (position-at-point start) 1)))
+        (delete-previous-char))
+      (when (eq 'vi-delete (command-name (this-command)))
+        (case type
+          (:line
+           (move-to-column (current-point)
+                           (max 0
+                                (min (1- (length (line-string (current-point)))) pos))))
+          (:block
+           (move-to-line (current-point) (min (line-number-at-point start)
                                             (line-number-at-point end)))
-         (move-to-column (current-point) (min column-start
-                                              column-end))))
-      ;; After 'dw' or 'dW', move to the first non-blank char
-      (when (and (this-motion-command)
-                 (member (command-name (this-motion-command))
-                         '(vi-forward-word-begin
-                           vi-forward-word-begin-broad)
-                         :test 'eq))
-        (skip-chars-forward (current-point) '(#\Space #\Tab))))))
+           (move-to-column (current-point) (min column-start
+                                                column-end))))
+        ;; After 'dw' or 'dW', move to the first non-blank char
+        (when (and (this-motion-command)
+                   (member (command-name (this-motion-command))
+                           '(vi-forward-word-begin
+                             vi-forward-word-begin-broad)
+                           :test 'eq))
+          (skip-chars-forward (current-point) '(#\Space #\Tab)))))))
 
 (define-operator vi-delete-line (start end type) ("<R>")
     (:motion vi-move-to-end-of-line)

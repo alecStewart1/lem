@@ -93,7 +93,8 @@ Works both horizontally and vertically, as it is based on buffer positions."
     (cycle-real-cursor (- n))))
 
 (defun clear-duplicate-cursors (buffer)
-  "Clear all duplicate (fake) cursors in BUFFER."
+  "Clear all duplicate (fake) cursors in BUFFER.
+Used mainly for garbage collection."
   (let ((cursors (buffer-cursors buffer)))
     (declare (type (list lem-core:cursor) cursors)
              (optimize (speed 3) (safety 2)))
@@ -108,19 +109,23 @@ Works both horizontally and vertically, as it is based on buffer positions."
   "Clear all cursors in the current buffer."
   (let ((buffer (current-buffer)))
     (declare (type lem-core:buffer buffer))
-    (clear-duplicate-cursors buffer)))
+    (clear-cursors buffer)))
 
 (defun garbage-collection-cursors ()
   "Function to run to clear all duplicate (fake) cursors on `*post-command-hook*`."
-  (clear-duplicate-cursors (current-buffer)))
+  (let ((buf (current-buffer)))
+    (declare (type lem-core:buffer buf))
+    (clear-duplicate-cursors buf)))
 
 (add-hook *post-command-hook* 'garbage-collection-cursors)
 
 (defun clear-cursors-when-aborted ()
   "Function to run to clear all duplicate (fake) cursors on `*editor-abort-hook*`."
-  (let ((str (merge-cursor-killrings (current-buffer))))
-    (declare (type string str))
-    (clear-cursors (current-buffer))
+  (let* ((buf (current-buffer))
+         (str (merge-cursor-killrings buf)))
+    (declare (type string str)
+             (type lem-core:buffer buf))
+    (clear-cursors buf)
     (copy-to-clipboard-with-killring str)))
 
 (add-hook *editor-abort-hook* 'clear-cursors-when-aborted)

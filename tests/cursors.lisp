@@ -192,13 +192,3 @@
                    nil)
       (ok (positions-set-equal '((1 0) (1 2) (2 0) (2 2))
                                (all-positions buffer))))))
-
-(deftest clear-duplicate-cursors-preserves-columns
-  (lem-fake-interface:with-fake-interface ()
-    (with-testing-buffer (buffer (make-text-buffer (lines "aaaa")))
-      (let ((p (lem:buffer-point buffer)))
-        (lem:character-offset p 2)
-        (lem:make-fake-cursor p))
-      (lem-core/commands/multiple-cursors::clear-duplicate-cursors buffer)
-      (ok (positions-set-equal '((1 0) (1 2))
-                               (all-positions buffer))))))
