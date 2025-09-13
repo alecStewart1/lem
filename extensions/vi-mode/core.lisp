@@ -241,7 +241,7 @@
      :initform 1
      :accessor vi-motion-default-n-arg)))
 
-(defclass vi-operator (vi-command) ())
+(defclass vi-operator (vi-command lem-core:editable-advice) ())
 
 (defclass vi-text-object (vi-motion) ())
 
