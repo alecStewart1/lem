@@ -59,20 +59,20 @@ When rendering the DOM and a window in a one-to-one manner, no redraw is require
           (mapcar (lambda (impl)
                     (find impl classes :test 'string= :key 'class-name))
                   ;; always try to find specified implementation first
-                  (list implementation :webview :ncurses :sdl2)))
+                  (list implementation :webview :ncurses :sdl2 :sdl3)))
 
     ;; pick the first implementation that is available
     (setf class (funcall #'some #'identity implementation-fallback))
 
     (if (string= (class-name class) implementation)
-         (log:info "Using interface: ~A" implementation)
-         (log:warn "User specified non-existant interface ~A; Using ~A instead.
+        (log:info "Using interface: ~A" implementation)
+        (log:warn "User specified non-existant interface ~A; Using ~A instead.
 Available interfaces: ~A"
-                   implementation class classes))
-    
+                  implementation class classes))
+
     (if class
-      (make-instance class)
-      (error "No interfaces found (is lem compiled with an interface?)"))))
+        (make-instance class)
+        (error "No interfaces found (is lem compiled with an interface?)"))))
 
 (defvar lem-if:*background-color-of-drawing-window* nil)
 
@@ -132,8 +132,8 @@ PIXEL-X, PIXEL-Y, PIXEL-WIDTH, PIXEL-HEIGHT are in pixels (may be nil for auto-c
 
 (defgeneric lem-if:display-popup-menu (implementation items
                                        &key action-callback
-                                            print-spec
-                                            style
+                                         print-spec
+                                         style
                                          max-display-items)
   (:documentation "Create a popup-menu and display it. See `display-popup-menu`."))
 
@@ -210,9 +210,9 @@ chrome. The default method is a no-op for frontends that do not support it.")
 (defmacro with-implementation (implementation &body body)
   `(let* ((*implementation* ,implementation)
           (bt2:*default-special-bindings*
-            (acons '*implementation*
-                   *implementation*
-                   bt2:*default-special-bindings*)))
+           (acons '*implementation*
+                  *implementation*
+                  bt2:*default-special-bindings*)))
      ,@body))
 
 (defun display-background-mode ()

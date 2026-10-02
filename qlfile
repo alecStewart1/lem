@@ -7,6 +7,7 @@ git rove https://github.com/fukamachi/rove.git
 git cl-sdl2 https://github.com/lem-project/cl-sdl2.git
 git cl-sdl2-ttf https://github.com/lem-project/cl-sdl2-ttf.git
 git cl-sdl2-image https://github.com/lem-project/cl-sdl2-image.git
+git cl-sdl3 https://github.com/aiffc/cl-sdl3.git
 git jsonrpc https://github.com/cxxxr/jsonrpc.git
 git cl-template https://github.com/alpha123/cl-template
 git webview https://github.com/lem-project/webview.git
