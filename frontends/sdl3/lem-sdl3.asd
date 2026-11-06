@@ -1,30 +1,32 @@
 (defsystem "lem-sdl3"
-    :depends-on ("cl-sdl3"
-                 "lem/core"
-                 "lem/extensions"
-                 "trivial-main-thread")
-    :serial t
-    :components ((:file "wm")
-                 (:file "resource")
-                 (:file "platform")
-                 (:file "keyboard")
-                 (:file "font")
-                 (:file "icon")
-                 (:file "text-surface-cache")
-                 (:file "log")
-                 (:file "sdl3")
-                 (:file "icon-font")
-                 (:file "mouse")
-                 (:file "utils")
-                 (:file "display")
-                 (:file "view")
-                 (:file "main")
-                 (:file "drawing")
-                 (:file "graphics")
-                 (:file "image-buffer")
-                 (:file "tree")
-                 (:file "color-picker"))
-    :in-order-to ((test-op (test-op "lem-sdl3/tests"))))
+  :depends-on ("cl-sdl3"
+               "lem/core"
+               "lem/extensions"
+               "trivial-main-thread")
+  :serial t
+  :components (
+               ;(:file "wm")
+               (:file "resource")
+               (:file "platform")
+               ;(:file "keyboard")
+               (:file "font")
+               ;(:file "icon")
+               ;(:file "text-surface-cache")
+               (:file "log")
+               (:file "sdl3")
+               ;(:file "icon-font")
+               ;(:file "mouse")
+               (:file "utils")
+               ;(:file "display")
+               ;(:file "view")
+               ;(:file "main")
+               ;(:file "drawing")
+               ;(:file "graphics")
+               ;(:file "image-buffer")
+               ;(:file "tree")
+               ;(:file "color-picker")
+               (:file "scratch-frame"))
+  :in-order-to ((test-op (test-op "lem-sdl3/tests"))))
 
 (defsystem "lem-sdl3/tests"
     :depends-on ("lem-sdl3" "rove")

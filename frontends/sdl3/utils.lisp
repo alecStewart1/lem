@@ -45,16 +45,13 @@
   "Convenience wrapper to make an `sdl3:frect`."
   (make-instance 'sdl3:frect :x% x :y% y :w% w :h% h))
 
-(defun create-texture (renderer texture x y w h)
-  (sdl3:render-texture renderer
-                       texture
-                       nil
-                       (make-frect x y w h)))
-
-(defun render-texture (renderer texture x y w h)
-  (sdl3:with-rects ((dest-rect x y width height))
-    (sdl3:render-copy-ex renderer
-                         texture
-                         :source-rect nil
-                         :dest-rect dest-rect
-                         :flip (list :none))))
+(defun cleanup-and-quit (frame font renderer window)
+  "Convenience for cleaning up a renderer and window, and
+then quitting."
+  (when frame
+    (sdl3-ttf:close-font (font frame))
+    (sdl3:destory-renderer (renderer frame))
+    (sdl3:destroy-window (window frame))
+    (sdl3-ttf:quit)
+    (sdl3:quit)
+    (setf *scratch* nil)))
